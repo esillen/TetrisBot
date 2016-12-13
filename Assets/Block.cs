@@ -17,7 +17,9 @@ public class Block {
     public int xpos = 4, ypos = 5;
     public GameObject block_transform;
 
-    public Block(string type, Transform t_parent, GameObject orig_sprite) {
+	public Block(string type, Transform t_parent, GameObject orig_sprite, int x, int y) {
+		xpos = x;
+		ypos = y;
         switch (type){
             case "I":
                 the_array = I.Clone() as bool[,];
@@ -71,9 +73,9 @@ public class Block {
         {
             for (int j = 0; j < the_array.GetLength(1); j++)
             {
-                if (the_array[i, j])
+				if (the_array[i, j] && ypos+i>=0)
                 {
-                    if (xpos + j < 0 || ypos + i < 0 || xpos + j >= GameField.game_field.GetLength(1) || ypos + i >= GameField.game_field.GetLength(0) || GameField.game_field[ypos + i, xpos + j]){
+                    if (xpos + j < 0 || xpos + j >= GameField.game_field.GetLength(1) || ypos + i >= GameField.game_field.GetLength(0) || GameField.game_field[ypos + i, xpos + j]){
                         //Collission
                         xpos -= xdir;
                         ypos -= ydir;
@@ -106,11 +108,11 @@ public class Block {
             for (int j = 0; j < the_array.GetLength(1); j++)
             {
                 flipped_array[i, j] = transposed_array[i, the_array.GetLength(1) -1 - j];
-                if (flipped_array[i, j])
+				if (flipped_array[i, j] && ypos +i>=0)
                 {
-                    if (xpos + j < 0 || ypos + i < 0 || xpos + j >= GameField.game_field.GetLength(1) || ypos + i >= GameField.game_field.GetLength(0) || GameField.game_field[ypos + i, xpos + j])
+                    if (xpos + j < 0 || xpos + j >= GameField.game_field.GetLength(1) || ypos + i >= GameField.game_field.GetLength(0) || GameField.game_field[ypos + i, xpos + j])
                     {
-                        Debug.Log("WTF");
+                        Debug.Log("Rotation collission");
                         return false; //Collission!!!
                     }
                 }

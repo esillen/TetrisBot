@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 public class GameField : MonoBehaviour {
 
+	public Wrapper theWrapper;
+
     public static bool [,] game_field = new bool[20,10];
     public List<GameObject> sprites;
     public GameObject orig_sprite;
-    public Block selected_block;
+    public Block selected_block, nextBlock;
     public GameObject t_game_field;
     public GameObject t_surrounding;
     private static List<string> letters = new List<string>() {"I","J","L","O","T","Z","S"};
@@ -19,7 +21,8 @@ public class GameField : MonoBehaviour {
         t_surrounding = new GameObject();
         t_surrounding.name = "surrounding";
         t_surrounding.transform.parent = transform.parent;
-        selected_block = new Block("J", transform, orig_sprite);
+        selected_block = new Block("J", transform, orig_sprite, 4, -1);
+		nextBlock = new Block("J", transform, orig_sprite, 4, -1);
 
         for (int i = -1; i< game_field.GetLength(0)+1; i++){
             for (int j = -1; j< game_field.GetLength(1)+1; j++){
@@ -32,48 +35,48 @@ public class GameField : MonoBehaviour {
         }
     }
 
+	public void moveDown(){
+		if (selected_block.Move(0, 1)){
+			selected_block.UpdateVisuals();
+		}
+		else {
+			setNewBlock ();
+		}
+	}
+
+	public void moveDrop(){
+		while (selected_block.Move(0, 1));
+		setNewBlock ();
+	}
+
+	public void moveLeft(){
+		if (selected_block.Move(-1, 0)) {
+			selected_block.UpdateVisuals();
+		}
+	}
+
+	public void moveRight(){
+		if (selected_block.Move(1, 0)){
+			selected_block.UpdateVisuals();
+		}
+
+	}
+
+	public void moveSpin(){
+		if (selected_block.Rotate()){
+			selected_block.UpdateVisuals();
+		}
+	}
+
+	public void setNewBlock(){
+		MergeBlockWithField(selected_block);
+		selected_block = nextBlock;
+		nextBlock = new Block(letters[Random.Range(0,6)],transform, orig_sprite,4, -1);
+		theWrapper.updateBlock(selected_block, nextBlock);
+	}
 
     public void Update() {
         sprites = new List<GameObject>();
-
-        if (Input.GetKeyDown(KeyCode.LeftArrow)){
-            if (selected_block.Move(-1, 0)) {
-                selected_block.UpdateVisuals();
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            if (selected_block.Move(1, 0))
-            {
-                selected_block.UpdateVisuals();
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if (selected_block.Move(0, 1))
-            {
-                selected_block.UpdateVisuals();
-            }
-            else {
-                MergeBlockWithField(selected_block);
-                selected_block = new Block(letters[Random.Range(0,6)],transform, orig_sprite);
-            
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            if (selected_block.Move(0, -1))
-            {
-                selected_block.UpdateVisuals();
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (selected_block.Rotate())
-            {
-                selected_block.UpdateVisuals();
-            }
-        }
     }
 
     public void MergeBlockWithField(Block b) {
@@ -89,7 +92,6 @@ public class GameField : MonoBehaviour {
                 }
             }
         }
-
         //Collapse rows if possible
         int current_row = game_field.GetLength(0)-1;
         int temp_score = 0;
